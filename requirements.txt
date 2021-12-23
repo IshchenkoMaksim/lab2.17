@@ -1,0 +1,8 @@
+attrs==21.2.0
+certifi==2021.10.8
+click==8.0.3
+colorama==0.4.4
+importlib-resources==5.4.0
+pyrsistent==0.18.0
+wincertstore==0.2
+zipp==3.6.0
