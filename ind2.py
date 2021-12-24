@@ -75,7 +75,7 @@ def display(filename):
 
 @cli.command()
 @click.argument('filename')
-@click.option("-t", "--time")
+@click.option("-t", "--time", help="Введите нужное время")
 def select(filename, time):
     routes = load_routes(filename)
     result = []
