@@ -13,9 +13,9 @@ def cli():
 
 @cli.command()
 @click.argument('filename')
-@click.option("-d", "--destination")
-@click.option("-n", "--number")
-@click.option("-t", "--time")
+@click.option("-d", "--destination", help='Введите пункт назначения')
+@click.option("-n", "--number", help='Введите номер маршрута')
+@click.option("-t", "--time", help='Введите время отправления')
 def add(filename, destination, number, time):
     """
     Запросить данные о маршруте.
@@ -105,9 +105,5 @@ def save_routes(file_name, way):
         json.dump(way, f, ensure_ascii=False, indent=4)
 
 
-def main():
-    cli()
-
-
 if __name__ == '__main__':
-    main()
+    cli()
