@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sys
 import json
 import click
 import os
+from datetime import datetime
 
 
 @click.group()
@@ -24,6 +26,7 @@ def add(filename, destination, number, time):
         routes = load_routes(filename)
     else:
         routes = []
+
     routes.append(
         {
             'destination': destination,
@@ -31,6 +34,13 @@ def add(filename, destination, number, time):
             'time': time,
         }
     )
+
+    try:
+        datetime.strptime(time, "%H:%M")
+    except ValueError:
+        print("Неправильный формат времени", file=sys.stderr)
+        exit(1)
+
     with open(filename, "w", encoding="utf-8") as fl:
         json.dump(routes, fl, ensure_ascii=False, indent=4)
     click.secho("Маршрут добавлен")
@@ -77,32 +87,57 @@ def display(filename):
 @click.argument('filename')
 @click.option("-t", "--time", help="Введите нужное время")
 def select(filename, time):
+    """
+    Выбрать маршруты после заданного времени.
+    """
     routes = load_routes(filename)
     result = []
 
+    try:
+        time = datetime.strptime(time, "%H:%M")
+    except ValueError:
+        print("Неправильный формат времени", file=sys.stderr)
+        exit(1)
+
     for route in routes:
-        time_route = tuple(route.get('time').split(':'))
+        time_route = route.get('time')
+        time_route = datetime.strptime(time_route, "%H:%M")
         if time < time_route:
             result.append(route)
 
-    # Возвратить список выбранных маршрутов.
-    return result
+    if result:
+        line = '+-{}-+-{}-+-{}-+'.format(
+            '-' * 30,
+            '-' * 4,
+            '-' * 20
+        )
+        print(line)
+        print(
+            '| {:^30} | {:^4} | {:^20} |'.format(
+                "Пункт назначения",
+                "№",
+                "Время"
+            )
+        )
+        print(line)
+
+        for route in result:
+            print(
+                '| {:<30} | {:>4} | {:<20} |'.format(
+                    route.get('destination', ''),
+                    route.get('number', ''),
+                    route.get('time', '')
+                )
+            )
+        print(line)
+
+    else:
+        print("Маршруты не найдены")
 
 
 def load_routes(filename):
     with open(filename, "r", encoding="utf-8") as f:
         return json.load(f)
-
-
-def save_routes(file_name, way):
-    """
-    Сохранить все пути в файл JSON.
-    """
-    # Открыть файл с заданным именем для записи.
-    with open(file_name, "w", encoding="utf-8") as f:
-        # Выполнить сериализацию данных в формат JSON.
-        # Для поддержки кирилицы установим ensure_ascii=False
-        json.dump(way, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == '__main__':

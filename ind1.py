@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sys
 import argparse
 import json
 import os.path
+from datetime import datetime
 
 
 def get_route(way, destination, number, time):
@@ -17,6 +19,12 @@ def get_route(way, destination, number, time):
             'time': time,
         }
     )
+
+    try:
+        datetime.strptime(time, "%H:%M")
+    except ValueError:
+        print("Неправильный формат времени", file=sys.stderr)
+        exit(1)
 
     return way
 
@@ -62,7 +70,8 @@ def select_routes(way, period):
     result = []
 
     for route in way:
-        time_route = tuple(route.get('time').split(':'))
+        time_route = route.get('time')
+        time_route = datetime.strptime(time_route, "%H:%M")
         if period < time_route:
             result.append(route)
 
@@ -184,9 +193,16 @@ def main(command_line=None):
 
     # Выбрать требуемых рааботников.
     elif args.command == "select":
-        time_select = args.time.split(":")
-        time_select = tuple(time_select)
+        time_select = args.time
+
+        try:
+            time_select = datetime.strptime(time_select, "%H:%M")
+        except ValueError:
+            print("Неправильный формат времени", file=sys.stderr)
+            exit(1)
+
         selected = select_routes(routes, time_select)
+        # Отобразить выбранные маршруты.
         display_routes(selected)
 
     # Сохранить данные в файл, если список работников был изменен.
